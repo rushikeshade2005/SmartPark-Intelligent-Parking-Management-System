@@ -57,6 +57,160 @@ exports.getMyDashboard = async (req, res, next) => {
   }
 };
 
+// @desc    Get analytics for logged-in admin only
+// @route   GET /api/admin/my-analytics
+exports.getMyAnalytics = async (req, res, next) => {
+  try {
+    const managedLots = await ParkingLot.find({ managedBy: req.user._id }).select('_id name city');
+    const managedLotIds = managedLots.map((lot) => lot._id);
+
+    if (managedLotIds.length === 0) {
+      return res.json({
+        success: true,
+        data: {
+          totalUsers: 0,
+          totalLots: 0,
+          totalSlots: 0,
+          availableSlots: 0,
+          occupiedSlots: 0,
+          reservedSlots: 0,
+          totalBookings: 0,
+          activeBookings: 0,
+          completedBookings: 0,
+          cancelledBookings: 0,
+          totalRevenue: 0,
+          todayRevenue: 0,
+          todayBookings: 0,
+          avgDuration: 0,
+          occupancyRate: 0,
+          cancellationRate: 0,
+          popularLots: [],
+          recentBookings: [],
+        },
+      });
+    }
+
+    const slotIds = await ParkingSlot.find({ parkingLotId: { $in: managedLotIds } }).distinct('_id');
+
+    const [
+      totalLots,
+      totalSlots,
+      availableSlots,
+      occupiedSlots,
+      reservedSlots,
+      totalBookings,
+      activeBookings,
+      completedBookings,
+      cancelledBookings,
+      uniqueUsers,
+      recentBookings,
+    ] = await Promise.all([
+      ParkingLot.countDocuments({ _id: { $in: managedLotIds } }),
+      ParkingSlot.countDocuments({ parkingLotId: { $in: managedLotIds }, isActive: true }),
+      ParkingSlot.countDocuments({ parkingLotId: { $in: managedLotIds }, status: 'available', isActive: true }),
+      ParkingSlot.countDocuments({ parkingLotId: { $in: managedLotIds }, status: 'occupied', isActive: true }),
+      ParkingSlot.countDocuments({ parkingLotId: { $in: managedLotIds }, status: 'reserved', isActive: true }),
+      Booking.countDocuments({ parkingLotId: { $in: managedLotIds } }),
+      Booking.countDocuments({ parkingLotId: { $in: managedLotIds }, bookingStatus: { $in: ['confirmed', 'active'] } }),
+      Booking.countDocuments({ parkingLotId: { $in: managedLotIds }, bookingStatus: 'completed' }),
+      Booking.countDocuments({ parkingLotId: { $in: managedLotIds }, bookingStatus: 'cancelled' }),
+      Booking.distinct('userId', { parkingLotId: { $in: managedLotIds } }),
+      Booking.find({ parkingLotId: { $in: managedLotIds } })
+        .populate('userId', 'name email')
+        .populate('parkingLotId', 'name city')
+        .populate('slotId', 'slotNumber')
+        .sort('-createdAt')
+        .limit(15),
+    ]);
+
+    const revenueAgg = slotIds.length > 0
+      ? await Payment.aggregate([
+          { $match: { status: 'success', slotId: { $in: slotIds } } },
+          { $group: { _id: null, total: { $sum: '$amount' } } },
+        ])
+      : [];
+    const totalRevenue = revenueAgg.length > 0 ? revenueAgg[0].total : 0;
+
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayRevenueAgg = slotIds.length > 0
+      ? await Payment.aggregate([
+          { $match: { status: 'success', slotId: { $in: slotIds }, paymentDate: { $gte: todayStart } } },
+          { $group: { _id: null, total: { $sum: '$amount' } } },
+        ])
+      : [];
+    const todayRevenue = todayRevenueAgg.length > 0 ? todayRevenueAgg[0].total : 0;
+
+    const todayBookings = await Booking.countDocuments({
+      parkingLotId: { $in: managedLotIds },
+      createdAt: { $gte: todayStart },
+    });
+
+    const popularLotsRaw = await Booking.aggregate([
+      { $match: { parkingLotId: { $in: managedLotIds } } },
+      {
+        $group: {
+          _id: '$parkingLotId',
+          bookings: { $sum: 1 },
+        },
+      },
+      { $sort: { bookings: -1 } },
+      { $limit: 10 },
+      {
+        $lookup: {
+          from: 'parkinglots',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'lot',
+        },
+      },
+      { $unwind: '$lot' },
+      {
+        $project: {
+          name: '$lot.name',
+          city: '$lot.city',
+          bookings: 1,
+        },
+      },
+    ]);
+
+    const avgDurationAgg = await Booking.aggregate([
+      { $match: { parkingLotId: { $in: managedLotIds }, duration: { $gt: 0 } } },
+      { $group: { _id: null, avgDuration: { $avg: '$duration' } } },
+    ]);
+    const avgDuration = avgDurationAgg.length > 0 ? Math.round(avgDurationAgg[0].avgDuration * 10) / 10 : 0;
+
+    const occupancyRate = totalSlots > 0 ? Math.round(((occupiedSlots + reservedSlots) / totalSlots) * 100) : 0;
+    const cancellationRate = totalBookings > 0 ? Math.round((cancelledBookings / totalBookings) * 100) : 0;
+
+    res.json({
+      success: true,
+      data: {
+        totalUsers: uniqueUsers.length,
+        totalLots,
+        totalSlots,
+        availableSlots,
+        occupiedSlots,
+        reservedSlots,
+        totalBookings,
+        activeBookings,
+        completedBookings,
+        cancelledBookings,
+        totalRevenue,
+        todayRevenue,
+        todayBookings,
+        avgDuration,
+        occupancyRate,
+        cancellationRate,
+        popularLots: popularLotsRaw,
+        recentBookings,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Get parking lots managed by logged-in admin
 // @route   GET /api/admin/parking-lots
 exports.getMyParkingLots = async (req, res, next) => {

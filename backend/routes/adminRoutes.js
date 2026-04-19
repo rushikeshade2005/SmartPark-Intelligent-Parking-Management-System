@@ -6,6 +6,7 @@ const {
 	getAnalytics,
 	getActiveBookings,
 	getMyDashboard,
+	getMyAnalytics,
 	getMyParkingLots,
 	getMyParkingLotById,
 	getMyParkingSlots,
@@ -13,6 +14,7 @@ const {
 const { protect, adminOnly } = require('../middleware/auth');
 
 router.get('/my-dashboard', protect, adminOnly, getMyDashboard);
+router.get('/my-analytics', protect, adminOnly, getMyAnalytics);
 router.get('/parking-lots', protect, adminOnly, getMyParkingLots);
 router.get('/parking-lots/:id', protect, adminOnly, getMyParkingLotById);
 router.get('/parking-lots/:lotId/slots', protect, adminOnly, getMyParkingSlots);
