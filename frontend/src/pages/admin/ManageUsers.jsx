@@ -21,6 +21,9 @@ const ManageUsers = () => {
     password: '',
     phoneNumber: '',
   });
+  const canCreateAdmins =
+    currentUser?.isMasterAdmin === true || currentUser?.email === 'admin@smartpark.com';
+  const canDeleteUsers = canCreateAdmins;
 
   useEffect(() => {
     fetchUsers();
@@ -48,6 +51,10 @@ const ManageUsers = () => {
   };
 
   const handleDelete = async (id, name) => {
+    if (!canDeleteUsers) {
+      toast.error('Only the master admin can delete users');
+      return;
+    }
     if (!confirm(`Delete user "${name}"? This cannot be undone.`)) return;
     try {
       await api.delete(`/admin/users/${id}`);
@@ -59,6 +66,10 @@ const ManageUsers = () => {
   };
 
   const handleDeleteAdmin = async (id, name) => {
+    if (!canDeleteUsers) {
+      toast.error('Only the master admin can delete users');
+      return;
+    }
     if (!confirm(`Delete admin "${name}"? This cannot be undone.`)) return;
     try {
       await api.delete(`/admin/users/${id}`);
@@ -80,9 +91,6 @@ const ManageUsers = () => {
           a.name.toLowerCase().includes(search.toLowerCase()) ||
           a.email.toLowerCase().includes(search.toLowerCase())
       );
-
-  const canCreateAdmins =
-    currentUser?.isMasterAdmin === true || currentUser?.email === 'admin@smartpark.com';
 
   const handleCreateAdmin = async (e) => {
     e.preventDefault();
@@ -235,13 +243,17 @@ const ManageUsers = () => {
                   )}
                   <td className="py-3 px-4 text-gray-500 dark:text-gray-400">{formatDate(item.createdAt)}</td>
                   <td className="py-3 px-4">
-                    <button
-                      onClick={() => activeTab === 'users' ? handleDelete(item._id, item.name) : handleDeleteAdmin(item._id, item.name)}
-                      className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-gray-400 hover:text-red-600 transition-colors"
-                      title={`Delete ${activeTab === 'users' ? 'user' : 'admin'}`}
-                    >
-                      <HiOutlineTrash size={16} />
-                    </button>
+                    {activeTab === 'users' && canDeleteUsers ? (
+                      <button
+                        onClick={() => handleDelete(item._id, item.name)}
+                        className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-gray-400 hover:text-red-600 transition-colors"
+                        title="Delete user"
+                      >
+                        <HiOutlineTrash size={16} />
+                      </button>
+                    ) : (
+                      <span className="text-gray-300 dark:text-gray-600">-</span>
+                    )}
                   </td>
                 </motion.tr>
               ))}
