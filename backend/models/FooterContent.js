@@ -27,7 +27,7 @@ const footerContentSchema = new mongoose.Schema(
     },
     copyright: {
       type: String,
-      default: '┬⌐ {year} SmartPark. All rights reserved.',
+      default: '© {year} SmartPark. All rights reserved.',
     },
   },
   { timestamps: true }

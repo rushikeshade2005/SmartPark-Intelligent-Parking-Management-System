@@ -1,7 +1,7 @@
 const ContactInfo = require('../models/ContactInfo');
 const FooterContent = require('../models/FooterContent');
 
-// ΓöÇΓöÇΓöÇ Contact Info ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ─── Contact Info ────────────────────────────────────────────────
 
 // @desc    Get contact info (public)
 // @route   GET /api/cms/contact-info
@@ -39,7 +39,7 @@ exports.updateContactInfo = async (req, res, next) => {
   }
 };
 
-// ΓöÇΓöÇΓöÇ Footer Content ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ─── Footer Content ──────────────────────────────────────────────
 
 // @desc    Get footer content (public)
 // @route   GET /api/cms/footer

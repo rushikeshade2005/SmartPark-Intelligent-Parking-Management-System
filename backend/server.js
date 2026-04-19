@@ -95,8 +95,8 @@ const startServer = async () => {
   await seedAdmin();
   startBookingScheduler(io);
   server.listen(PORT, () => {
-    console.log(`≡ƒÜù SmartPark Server running on port ${PORT}`);
-    console.log(`≡ƒôí Socket.io ready for real-time updates`);
+    console.log(`🚗 SmartPark Server running on port ${PORT}`);
+    console.log(`📡 Socket.io ready for real-time updates`);
   });
 };
 

@@ -36,7 +36,7 @@ exports.processPayment = async (req, res, next) => {
     await User.findByIdAndUpdate(req.user._id, {
       $push: {
         notifications: {
-          message: `Payment of Γé╣${booking.totalAmount} successful. Transaction: ${payment.transactionId}`,
+          message: `Payment of ₹${booking.totalAmount} successful. Transaction: ${payment.transactionId}`,
           type: 'payment',
         },
       },
@@ -46,7 +46,7 @@ exports.processPayment = async (req, res, next) => {
     const payNotif = await Notification.create({
       userId: req.user._id,
       title: 'Payment Successful',
-      message: `Payment of Γé╣${booking.totalAmount} processed. Transaction: ${payment.transactionId}`,
+      message: `Payment of ₹${booking.totalAmount} processed. Transaction: ${payment.transactionId}`,
       type: 'payment',
       link: '/dashboard/payments',
     });

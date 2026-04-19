@@ -15,7 +15,7 @@ const formatBookingData = (bookings) => {
     'Start Time': new Date(b.startTime).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
     'End Time': new Date(b.endTime).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
     'Duration (hrs)': b.duration,
-    'Amount (Γé╣)': b.totalAmount,
+    'Amount (₹)': b.totalAmount,
     'Booking Status': b.bookingStatus,
     'Payment Status': b.paymentStatus,
   }));
@@ -100,7 +100,7 @@ exports.exportBookingsPDF = async (req, res, next) => {
     doc
       .fontSize(11)
       .fillColor('#1e293b')
-      .text(`Total Bookings: ${total}    |    Completed: ${completed}    |    Total Spent: Γé╣${totalSpent.toLocaleString('en-IN')}`)
+      .text(`Total Bookings: ${total}    |    Completed: ${completed}    |    Total Spent: ₹${totalSpent.toLocaleString('en-IN')}`)
       .moveDown(1);
 
     // Bookings table
@@ -123,13 +123,13 @@ exports.exportBookingsPDF = async (req, res, next) => {
       doc.fontSize(9).fillColor('#64748b')
         .text(`${b.parkingLotId?.name || 'N/A'} - Slot ${b.slotId?.slotNumber || 'N/A'}`, 50, y + 16)
         .text(`Vehicle: ${b.vehicleNumber}`, 50, y + 28)
-        .text(`${new Date(b.startTime).toLocaleDateString('en-IN')} ${new Date(b.startTime).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })} ΓåÆ ${new Date(b.endTime).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}`, 50, y + 40)
+        .text(`${new Date(b.startTime).toLocaleDateString('en-IN')} ${new Date(b.startTime).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })} → ${new Date(b.endTime).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}`, 50, y + 40)
         .text(`Duration: ${b.duration} hr(s)`, 50, y + 52);
 
       // Status & amount on right
       const statusColor = b.bookingStatus === 'completed' ? '#22c55e' : b.bookingStatus === 'cancelled' ? '#ef4444' : '#f59e0b';
       doc.fontSize(12).font('Helvetica-Bold').fillColor('#4f46e5')
-        .text(`Γé╣${b.totalAmount}`, 450, y, { align: 'right', width: 95 })
+        .text(`₹${b.totalAmount}`, 450, y, { align: 'right', width: 95 })
         .font('Helvetica');
 
       doc.fontSize(8).fillColor(statusColor)
@@ -173,7 +173,7 @@ exports.exportPaymentsCSV = async (req, res, next) => {
       'Transaction ID': p.transactionId,
       'Parking Location': p.bookingId?.parkingLotId?.name || 'N/A',
       'Slot': p.bookingId?.slotId?.slotNumber || 'N/A',
-      'Amount (Γé╣)': p.amount,
+      'Amount (₹)': p.amount,
       'Payment Method': p.paymentMethod,
       'Status': p.status,
       'Date': new Date(p.paymentDate).toLocaleDateString('en-IN'),

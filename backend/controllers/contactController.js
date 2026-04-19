@@ -1,7 +1,7 @@
 const Contact = require('../models/Contact');
 const { sendContactReplyEmail } = require('../services/emailService');
 
-// @desc    Submit a contact message (public ΓÇö anyone can submit)
+// @desc    Submit a contact message (public — anyone can submit)
 // @route   POST /api/contact
 exports.submitContact = async (req, res, next) => {
   try {

@@ -28,7 +28,7 @@ exports.createBooking = async (req, res, next) => {
     const start = new Date(startTime);
     const end = new Date(endTime);
 
-    // ΓöÇΓöÇ Booking Overlap Protection ΓöÇΓöÇ
+    // ── Booking Overlap Protection ──
     const overlappingBooking = await Booking.findOne({
       slotId,
       bookingStatus: { $in: ['pending', 'confirmed', 'active'] },
@@ -355,7 +355,7 @@ exports.checkOut = async (req, res, next) => {
     }
 
     const checkoutMsg = booking.overdueCharge > 0
-      ? `Checked out from ${booking.parkingLotId.name || 'the parking lot'}. Overdue charge: Γé╣${booking.overdueCharge} (${booking.overdueHours}h extra).`
+      ? `Checked out from ${booking.parkingLotId.name || 'the parking lot'}. Overdue charge: ₹${booking.overdueCharge} (${booking.overdueHours}h extra).`
       : `You have checked out from ${booking.parkingLotId.name || 'the parking lot'}. Thank you!`;
 
     const checkoutNotif = await Notification.create({

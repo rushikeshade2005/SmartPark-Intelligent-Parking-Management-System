@@ -15,7 +15,7 @@ const startBookingScheduler = (io) => {
     try {
       const now = new Date();
 
-      // ΓöÇΓöÇ 1. Expire confirmed bookings that were never checked-in ΓöÇΓöÇ
+      // ── 1. Expire confirmed bookings that were never checked-in ──
       const expiredBookings = await Booking.find({
         bookingStatus: 'confirmed',
         endTime: { $lt: now },
@@ -61,7 +61,7 @@ const startBookingScheduler = (io) => {
     }
   }, INTERVAL_MS);
 
-  console.log('≡ƒòÉ Booking scheduler started (checks every 60s)');
+  console.log('🕐 Booking scheduler started (checks every 60s)');
 };
 
 module.exports = startBookingScheduler;

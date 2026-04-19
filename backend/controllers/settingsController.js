@@ -89,7 +89,7 @@ exports.getPublicSettings = async (req, res, next) => {
   }
 };
 
-// ΓöÇΓöÇΓöÇ Activity Log ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ─── Activity Log ────────────────────────────────────────────────
 
 // @desc    Get activity logs (admin)
 // @route   GET /api/settings/activity-log
