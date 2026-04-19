@@ -20,7 +20,7 @@ const AdminOverview = () => {
     const fetchAnalytics = async () => {
       try {
         const [analyticsRes, myDashboardRes] = await Promise.all([
-          api.get('/admin/analytics'),
+          api.get('/admin/my-analytics'),
           api.get('/admin/my-dashboard'),
         ]);
         setAnalytics(analyticsRes.data.data);
