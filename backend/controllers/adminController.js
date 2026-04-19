@@ -297,6 +297,18 @@ exports.getAdmins = async (req, res, next) => {
 // @route   DELETE /api/admin/users/:id
 exports.deleteUser = async (req, res, next) => {
   try {
+    const requestingAdmin = await User.findById(req.user._id).select('isMasterAdmin email role');
+    const canDeleteUsers =
+      !!requestingAdmin && requestingAdmin.role === 'admin' &&
+      (requestingAdmin.isMasterAdmin === true || requestingAdmin.email === 'admin@smartpark.com');
+
+    if (!canDeleteUsers) {
+      return res.status(403).json({
+        success: false,
+        message: 'Only the master admin can delete users',
+      });
+    }
+
     const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
