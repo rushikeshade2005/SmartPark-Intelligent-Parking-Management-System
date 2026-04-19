@@ -10,6 +10,7 @@ const formatUser = (user) => ({
   name: user.name,
   email: user.email,
   role: user.role,
+  isMasterAdmin: !!user.isMasterAdmin,
   vehicleNumber: user.vehicleNumber,
   phoneNumber: user.phoneNumber,
 });
