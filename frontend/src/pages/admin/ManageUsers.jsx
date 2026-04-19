@@ -92,6 +92,9 @@ const ManageUsers = () => {
           a.email.toLowerCase().includes(search.toLowerCase())
       );
 
+  const isProtectedAdmin = (admin) =>
+    admin?.isMasterAdmin === true || admin?.email === 'admin@smartpark.com';
+
   const handleCreateAdmin = async (e) => {
     e.preventDefault();
     setCreatingAdmin(true);
@@ -248,6 +251,14 @@ const ManageUsers = () => {
                         onClick={() => handleDelete(item._id, item.name)}
                         className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-gray-400 hover:text-red-600 transition-colors"
                         title="Delete user"
+                      >
+                        <HiOutlineTrash size={16} />
+                      </button>
+                    ) : activeTab === 'admins' && canDeleteUsers && !isProtectedAdmin(item) ? (
+                      <button
+                        onClick={() => handleDeleteAdmin(item._id, item.name)}
+                        className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-gray-400 hover:text-red-600 transition-colors"
+                        title="Delete admin"
                       >
                         <HiOutlineTrash size={16} />
                       </button>
