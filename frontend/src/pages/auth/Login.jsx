@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
-import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { HiOutlineMail, HiOutlineLockClosed } from 'react-icons/hi';
 
@@ -108,8 +107,8 @@ const Login = () => {
           </div>
 
           <div className="mt-4 p-3 bg-gray-50 dark:bg-dark-bg rounded-lg text-xs text-gray-500">
-            <p className="font-medium mb-1">Demo Credentials:</p>
-            <p>Admin: admin@smartpark.com / admin123</p>
+            <p className="font-medium mb-1">Account Access:</p>
+            <p>Use any registered user or admin account to sign in.</p>
           </div>
         </div>
       </motion.div>

@@ -10,6 +10,13 @@ const ManageUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [creatingAdmin, setCreatingAdmin] = useState(false);
+  const [adminForm, setAdminForm] = useState({
+    name: '',
+    email: '',
+    password: '',
+    phoneNumber: '',
+  });
 
   useEffect(() => {
     fetchUsers();
@@ -43,11 +50,72 @@ const ManageUsers = () => {
       u.email.toLowerCase().includes(search.toLowerCase())
   );
 
+  const handleCreateAdmin = async (e) => {
+    e.preventDefault();
+    setCreatingAdmin(true);
+    try {
+      await api.post('/auth/register-admin', {
+        name: adminForm.name.trim(),
+        email: adminForm.email.trim().toLowerCase(),
+        password: adminForm.password,
+        phoneNumber: adminForm.phoneNumber.trim(),
+      });
+      toast.success('Admin created successfully');
+      setAdminForm({ name: '', email: '', password: '', phoneNumber: '' });
+      fetchUsers();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to create admin');
+    } finally {
+      setCreatingAdmin(false);
+    }
+  };
+
   if (loading) return <LoadingSpinner />;
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Manage Users</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Manage Users & Admins</h1>
+
+      <div className="card mb-6">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Create New Admin</h2>
+        <form onSubmit={handleCreateAdmin} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+          <input
+            className="input-field"
+            placeholder="Admin name"
+            value={adminForm.name}
+            onChange={(e) => setAdminForm((prev) => ({ ...prev, name: e.target.value }))}
+            required
+          />
+          <input
+            type="email"
+            className="input-field"
+            placeholder="Admin email"
+            value={adminForm.email}
+            onChange={(e) => setAdminForm((prev) => ({ ...prev, email: e.target.value }))}
+            required
+          />
+          <input
+            type="password"
+            className="input-field"
+            placeholder="Min 6 character password"
+            value={adminForm.password}
+            onChange={(e) => setAdminForm((prev) => ({ ...prev, password: e.target.value }))}
+            minLength={6}
+            required
+          />
+          <input
+            className="input-field"
+            placeholder="Phone number (optional)"
+            value={adminForm.phoneNumber}
+            onChange={(e) => setAdminForm((prev) => ({ ...prev, phoneNumber: e.target.value }))}
+          />
+          <div className="md:col-span-2 lg:col-span-4">
+            <button type="submit" className="btn-primary" disabled={creatingAdmin}>
+              {creatingAdmin ? 'Creating Admin...' : 'Create Admin'}
+            </button>
+          </div>
+        </form>
+      </div>
 
       <div className="relative mb-6 max-w-md">
         <HiOutlineSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />

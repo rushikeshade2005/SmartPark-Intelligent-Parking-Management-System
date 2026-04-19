@@ -95,13 +95,20 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    const res = await api.post('/auth/login', { email, password });
+    const res = await api.post('/auth/login', { email: email.trim().toLowerCase(), password });
     dispatch({ type: 'LOGIN_SUCCESS', payload: res.data });
     return res.data;
   };
 
   const register = async (userData) => {
-    const res = await api.post('/auth/register', userData);
+    const payload = {
+      ...userData,
+      name: userData.name?.trim(),
+      email: userData.email?.trim().toLowerCase(),
+      vehicleNumber: userData.vehicleNumber?.trim(),
+      phoneNumber: userData.phoneNumber?.trim(),
+    };
+    const res = await api.post('/auth/register', payload);
     dispatch({ type: 'REGISTER_SUCCESS', payload: res.data });
     return res.data;
   };

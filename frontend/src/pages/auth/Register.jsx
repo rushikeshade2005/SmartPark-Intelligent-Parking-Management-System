@@ -22,11 +22,11 @@ const Register = () => {
     setLoading(true);
     try {
       await register({
-        name: form.name,
-        email: form.email,
+        name: form.name.trim(),
+        email: form.email.trim().toLowerCase(),
         password: form.password,
-        vehicleNumber: form.vehicleNumber,
-        phoneNumber: form.phoneNumber,
+        vehicleNumber: form.vehicleNumber.trim(),
+        phoneNumber: form.phoneNumber.trim(),
       });
       toast.success('Account created successfully!');
       navigate('/dashboard');
