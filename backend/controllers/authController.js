@@ -46,10 +46,16 @@ exports.register = async (req, res, next) => {
   }
 };
 
-// @desc    Register admin (admin only)
+// @desc    Register admin (master admin only)
 // @route   POST /api/auth/register-admin
 exports.registerAdmin = async (req, res, next) => {
   try {
+    // Check if requesting admin is the master admin
+    const requestingAdmin = await User.findById(req.user._id);
+    if (!requestingAdmin || !requestingAdmin.isMasterAdmin) {
+      return res.status(403).json({ success: false, message: 'Only the master admin can create new admins' });
+    }
+
     const { name, email, password, phoneNumber } = req.body;
     const normalizedEmail = sanitizeEmail(email);
 
@@ -65,6 +71,7 @@ exports.registerAdmin = async (req, res, next) => {
       role: 'admin',
       phoneNumber,
       vehicleNumber: '',
+      isMasterAdmin: false,
     });
 
     res.status(201).json({
