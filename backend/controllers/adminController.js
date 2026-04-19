@@ -313,8 +313,16 @@ exports.deleteUser = async (req, res, next) => {
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
+    if (String(user._id) === String(req.user._id)) {
+      return res.status(400).json({ success: false, message: 'You cannot delete your own account' });
+    }
     if (user.role === 'admin') {
-      return res.status(400).json({ success: false, message: 'Cannot delete admin user' });
+      const isTargetMasterAdmin = user.isMasterAdmin === true || user.email === 'admin@smartpark.com';
+      if (isTargetMasterAdmin) {
+        return res.status(400).json({ success: false, message: 'Master admin account cannot be deleted' });
+      }
+      await User.findByIdAndDelete(req.params.id);
+      return res.json({ success: true, message: 'Admin deleted' });
     }
     await User.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'User deleted' });
