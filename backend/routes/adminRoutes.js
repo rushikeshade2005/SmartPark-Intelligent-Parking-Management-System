@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {
 	getUsers,
+	getAdmins,
 	deleteUser,
 	getAnalytics,
 	getActiveBookings,
@@ -19,6 +20,7 @@ router.get('/parking-lots', protect, adminOnly, getMyParkingLots);
 router.get('/parking-lots/:id', protect, adminOnly, getMyParkingLotById);
 router.get('/parking-lots/:lotId/slots', protect, adminOnly, getMyParkingSlots);
 router.get('/users', protect, adminOnly, getUsers);
+router.get('/admins', protect, adminOnly, getAdmins);
 router.delete('/users/:id', protect, adminOnly, deleteUser);
 router.get('/analytics', protect, adminOnly, getAnalytics);
 router.get('/active-bookings', protect, adminOnly, getActiveBookings);

@@ -271,12 +271,23 @@ exports.getMyParkingSlots = async (req, res, next) => {
   }
 };
 
-// @desc    Get all users (admin)
+// @desc    Get all regular users (not admins) (admin)
 // @route   GET /api/admin/users
 exports.getUsers = async (req, res, next) => {
   try {
-    const users = await User.find().select('-notifications').sort('-createdAt');
+    const users = await User.find({ role: 'user' }).select('-notifications').sort('-createdAt');
     res.json({ success: true, data: users });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get all admins (admin)
+// @route   GET /api/admin/admins
+exports.getAdmins = async (req, res, next) => {
+  try {
+    const admins = await User.find({ role: 'admin' }).select('-notifications').sort('-createdAt');
+    res.json({ success: true, data: admins });
   } catch (error) {
     next(error);
   }
