@@ -3,21 +3,28 @@ import { motion } from 'framer-motion';
 import api from '../../services/api';
 import StatCard from '../../components/ui/StatCard';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
+import { useAuth } from '../../context/AuthContext';
 import { formatCurrency, formatDateTime, getStatusBadge } from '../../utils/helpers';
 import {
   HiOutlineUsers, HiOutlineOfficeBuilding, HiOutlineViewGrid,
-  HiOutlineCash, HiOutlineTicket, HiOutlineTrendingUp,
+  HiOutlineCash, HiOutlineTicket,
 } from 'react-icons/hi';
 
 const AdminOverview = () => {
+  const { user } = useAuth();
   const [analytics, setAnalytics] = useState(null);
+  const [myDashboard, setMyDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
-        const res = await api.get('/admin/analytics');
-        setAnalytics(res.data.data);
+        const [analyticsRes, myDashboardRes] = await Promise.all([
+          api.get('/admin/analytics'),
+          api.get('/admin/my-dashboard'),
+        ]);
+        setAnalytics(analyticsRes.data.data);
+        setMyDashboard(myDashboardRes.data.data);
       } catch (err) {
         console.error(err);
       } finally {
@@ -32,9 +39,43 @@ const AdminOverview = () => {
   return (
     <div>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
-        <p className="text-gray-500 dark:text-gray-400 mt-1">System overview and statistics</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Welcome, {myDashboard?.profile?.name || user?.name || 'Admin'}</h1>
+        <p className="text-gray-500 dark:text-gray-400 mt-1">Your admin dashboard with account details and system overview</p>
       </motion.div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <div className="card">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-3">Admin Profile</h2>
+          <div className="space-y-2 text-sm">
+            <p className="text-gray-600 dark:text-gray-300"><span className="font-semibold">Name:</span> {myDashboard?.profile?.name || '-'}</p>
+            <p className="text-gray-600 dark:text-gray-300"><span className="font-semibold">Email:</span> {myDashboard?.profile?.email || '-'}</p>
+            <p className="text-gray-600 dark:text-gray-300"><span className="font-semibold">Phone:</span> {myDashboard?.profile?.phoneNumber || '-'}</p>
+            <p className="text-gray-600 dark:text-gray-300"><span className="font-semibold">Joined:</span> {myDashboard?.profile?.joinedAt ? formatDateTime(myDashboard.profile.joinedAt) : '-'}</p>
+          </div>
+        </div>
+
+        <div className="card">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-3">Your Admin Stats</h2>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-lg bg-gray-50 dark:bg-dark-bg p-3">
+              <p className="text-xs text-gray-500">Total Admins</p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">{myDashboard?.myStats?.totalAdmins || 0}</p>
+            </div>
+            <div className="rounded-lg bg-gray-50 dark:bg-dark-bg p-3">
+              <p className="text-xs text-gray-500">Managed Lots</p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">{myDashboard?.myStats?.managedLots || 0}</p>
+            </div>
+            <div className="rounded-lg bg-gray-50 dark:bg-dark-bg p-3">
+              <p className="text-xs text-gray-500">Managed Slots</p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">{myDashboard?.myStats?.managedSlots || 0}</p>
+            </div>
+            <div className="rounded-lg bg-gray-50 dark:bg-dark-bg p-3">
+              <p className="text-xs text-gray-500">Managed Bookings</p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">{myDashboard?.myStats?.managedBookings || 0}</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mt-6">
@@ -93,6 +134,30 @@ const AdminOverview = () => {
             </div>
           ) : (
             <p className="text-gray-500 text-sm">No data available yet</p>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-8">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Parking Lots Managed By You</h2>
+        <div className="card">
+          {myDashboard?.managedLots?.length > 0 ? (
+            <div className="space-y-3">
+              {myDashboard.managedLots.map((lot) => (
+                <div key={lot._id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-dark-bg rounded-lg">
+                  <div>
+                    <p className="font-medium text-gray-900 dark:text-white">{lot.name}</p>
+                    <p className="text-xs text-gray-500">{lot.city} • Created {formatDateTime(lot.createdAt)}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">{lot.availableSlots}/{lot.totalSlots}</p>
+                    <p className="text-xs text-gray-500">Available Slots</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-sm">No parking lots assigned to your admin account yet.</p>
           )}
         </div>
       </div>
