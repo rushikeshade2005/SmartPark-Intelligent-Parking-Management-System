@@ -23,7 +23,7 @@ const ManageSlots = () => {
 
   const fetchLots = async () => {
     try {
-      const res = await api.get('/parking-lots');
+      const res = await api.get('/admin/parking-lots');
       setLots(res.data.data);
     } catch {
       toast.error('Failed to load lots');
@@ -36,7 +36,7 @@ const ManageSlots = () => {
     setSelectedLot(lot);
     setSlotsLoading(true);
     try {
-      const res = await api.get(`/parking-lots/${lot._id}/slots`);
+      const res = await api.get(`/admin/parking-lots/${lot._id}/slots`);
       setSlots(res.data.data);
     } catch {
       toast.error('Failed to load slots');

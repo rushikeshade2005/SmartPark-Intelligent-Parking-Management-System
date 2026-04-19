@@ -40,7 +40,7 @@ const ManageParkingLots = () => {
 
   const fetchLots = async () => {
     try {
-      const res = await api.get('/parking-lots');
+      const res = await api.get('/admin/parking-lots');
       setLots(res.data.data);
     } catch (err) {
       toast.error('Failed to load parking lots');
@@ -168,7 +168,7 @@ const ManageParkingLots = () => {
       toast.success('Images uploaded successfully!');
       fetchLots();
       // Refresh image modal data
-      const res = await api.get(`/parking-lots/${lotId}`);
+      const res = await api.get(`/admin/parking-lots/${lotId}`);
       setImageModal(res.data.data);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to upload images');
@@ -183,7 +183,7 @@ const ManageParkingLots = () => {
       await api.delete(`/parking-lots/${lotId}/images`, { data: { imageUrl } });
       toast.success('Image deleted');
       fetchLots();
-      const res = await api.get(`/parking-lots/${lotId}`);
+      const res = await api.get(`/admin/parking-lots/${lotId}`);
       setImageModal(res.data.data);
     } catch (err) {
       toast.error('Failed to delete image');
@@ -192,7 +192,7 @@ const ManageParkingLots = () => {
 
   const openImageModal = async (lot) => {
     try {
-      const res = await api.get(`/parking-lots/${lot._id}`);
+      const res = await api.get(`/admin/parking-lots/${lot._id}`);
       setImageModal(res.data.data);
     } catch {
       setImageModal(lot);
