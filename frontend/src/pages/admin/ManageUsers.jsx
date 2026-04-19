@@ -81,6 +81,9 @@ const ManageUsers = () => {
           a.email.toLowerCase().includes(search.toLowerCase())
       );
 
+  const canCreateAdmins =
+    currentUser?.isMasterAdmin === true || currentUser?.email === 'admin@smartpark.com';
+
   const handleCreateAdmin = async (e) => {
     e.preventDefault();
     setCreatingAdmin(true);
@@ -139,7 +142,7 @@ const ManageUsers = () => {
 
       {/* Create Admin Form - Only show on Admins tab and only for master admin */}
       {activeTab === 'admins' && (
-        currentUser?.isMasterAdmin ? (
+        canCreateAdmins ? (
           <div className="card mb-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Create New Admin</h2>
             <form onSubmit={handleCreateAdmin} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
