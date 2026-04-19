@@ -30,7 +30,7 @@ const AdminAnalytics = () => {
   const fetchAnalytics = async (showToast = false) => {
     try {
       if (showToast) setRefreshing(true);
-      const res = await api.get('/admin/analytics');
+      const res = await api.get('/admin/my-analytics');
       setData(res.data.data);
       if (showToast) toast.success('Analytics refreshed');
     } catch {
