@@ -3,6 +3,7 @@ const Booking = require('../models/Booking');
 const Payment = require('../models/Payment');
 const ParkingLot = require('../models/ParkingLot');
 const ParkingSlot = require('../models/ParkingSlot');
+const ParkingFloor = require('../models/ParkingFloor');
 
 // @desc    Get logged-in admin dashboard details
 // @route   GET /api/admin/my-dashboard
@@ -51,6 +52,66 @@ exports.getMyDashboard = async (req, res, next) => {
         managedLots,
       },
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get parking lots managed by logged-in admin
+// @route   GET /api/admin/parking-lots
+exports.getMyParkingLots = async (req, res, next) => {
+  try {
+    const lots = await ParkingLot.find({ managedBy: req.user._id }).sort('-createdAt');
+    res.json({ success: true, count: lots.length, data: lots });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get parking lot details managed by logged-in admin
+// @route   GET /api/admin/parking-lots/:id
+exports.getMyParkingLotById = async (req, res, next) => {
+  try {
+    const lot = await ParkingLot.findOne({ _id: req.params.id, managedBy: req.user._id });
+    if (!lot) {
+      return res.status(404).json({ success: false, message: 'Parking lot not found for this admin' });
+    }
+
+    const floors = await ParkingFloor.find({ parkingLotId: lot._id }).sort('floorNumber');
+    const slots = await ParkingSlot.find({ parkingLotId: lot._id, isActive: true });
+    const availableSlots = slots.filter((s) => s.status === 'available').length;
+    const occupiedSlots = slots.filter((s) => s.status !== 'available').length;
+
+    res.json({
+      success: true,
+      data: {
+        ...lot.toObject(),
+        availableSlots,
+        occupiedSlots,
+        floors,
+        slots,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get slots for admin's parking lot
+// @route   GET /api/admin/parking-lots/:lotId/slots
+exports.getMyParkingSlots = async (req, res, next) => {
+  try {
+    const lot = await ParkingLot.findOne({ _id: req.params.lotId, managedBy: req.user._id }).select('_id');
+    if (!lot) {
+      return res.status(404).json({ success: false, message: 'Parking lot not found for this admin' });
+    }
+
+    const slots = await ParkingSlot.find({
+      parkingLotId: req.params.lotId,
+      isActive: true,
+    }).populate('floorId');
+
+    res.json({ success: true, data: slots });
   } catch (error) {
     next(error);
   }

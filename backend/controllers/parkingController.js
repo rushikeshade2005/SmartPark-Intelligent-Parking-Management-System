@@ -5,6 +5,12 @@ const Review = require('../models/Review');
 const fs = require('fs');
 const path = require('path');
 
+const canAdminManageLot = (lot, adminId) => {
+  if (!lot || !adminId) return false;
+  if (!lot.managedBy) return false;
+  return lot.managedBy.toString() === adminId.toString();
+};
+
 // @desc    Get all parking lots
 // @route   GET /api/parking-lots
 exports.getParkingLots = async (req, res, next) => {
@@ -141,10 +147,12 @@ exports.updateParkingLot = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Parking lot not found' });
     }
 
-    const updatePayload = { ...req.body };
-    if (!existingLot.managedBy) {
-      updatePayload.managedBy = req.user._id;
+    if (!canAdminManageLot(existingLot, req.user._id)) {
+      return res.status(403).json({ success: false, message: 'You can only update your own parking lots' });
     }
+
+    const updatePayload = { ...req.body };
+    delete updatePayload.managedBy;
 
     const lot = await ParkingLot.findByIdAndUpdate(req.params.id, updatePayload, {
       new: true,
@@ -167,6 +175,11 @@ exports.deleteParkingLot = async (req, res, next) => {
     if (!lot) {
       return res.status(404).json({ success: false, message: 'Parking lot not found' });
     }
+
+    if (!canAdminManageLot(lot, req.user._id)) {
+      return res.status(403).json({ success: false, message: 'You can only delete your own parking lots' });
+    }
+
     await ParkingSlot.deleteMany({ parkingLotId: lot._id });
     await ParkingFloor.deleteMany({ parkingLotId: lot._id });
     await ParkingLot.findByIdAndDelete(lot._id);
@@ -223,14 +236,20 @@ exports.recommendSlot = async (req, res, next) => {
 exports.updateSlotStatus = async (req, res, next) => {
   try {
     const { status } = req.body;
+    const existingSlot = await ParkingSlot.findById(req.params.id).populate('parkingLotId', 'managedBy');
+    if (!existingSlot) {
+      return res.status(404).json({ success: false, message: 'Slot not found' });
+    }
+
+    if (!canAdminManageLot(existingSlot.parkingLotId, req.user._id)) {
+      return res.status(403).json({ success: false, message: 'You can only update slots from your own parking lots' });
+    }
+
     const slot = await ParkingSlot.findByIdAndUpdate(
       req.params.id,
       { status },
       { new: true }
     );
-    if (!slot) {
-      return res.status(404).json({ success: false, message: 'Slot not found' });
-    }
 
     // Emit real-time update
     const io = req.app.get('io');
@@ -251,6 +270,10 @@ exports.uploadParkingImages = async (req, res, next) => {
     const lot = await ParkingLot.findById(req.params.id);
     if (!lot) {
       return res.status(404).json({ success: false, message: 'Parking lot not found' });
+    }
+
+    if (!canAdminManageLot(lot, req.user._id)) {
+      return res.status(403).json({ success: false, message: 'You can only upload images for your own parking lots' });
     }
 
     if (!req.files || req.files.length === 0) {
@@ -280,6 +303,10 @@ exports.deleteParkingImage = async (req, res, next) => {
     const lot = await ParkingLot.findById(req.params.id);
     if (!lot) {
       return res.status(404).json({ success: false, message: 'Parking lot not found' });
+    }
+
+    if (!canAdminManageLot(lot, req.user._id)) {
+      return res.status(403).json({ success: false, message: 'You can only delete images from your own parking lots' });
     }
 
     lot.images = lot.images.filter((img) => img !== imageUrl);
