@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import api from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import toast from 'react-hot-toast';
 import { formatDate } from '../../utils/helpers';
 import { HiOutlineTrash, HiOutlineSearch } from 'react-icons/hi';
 
 const ManageUsers = () => {
+  const { user: currentUser } = useAuth();
   const [users, setUsers] = useState([]);
   const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -135,17 +137,18 @@ const ManageUsers = () => {
         </button>
       </div>
 
-      {/* Create Admin Form - Only show on Admins tab */}
+      {/* Create Admin Form - Only show on Admins tab and only for master admin */}
       {activeTab === 'admins' && (
-        <div className="card mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Create New Admin</h2>
-          <form onSubmit={handleCreateAdmin} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-            <input
-              className="input-field"
-              placeholder="Admin name"
-              value={adminForm.name}
-              onChange={(e) => setAdminForm((prev) => ({ ...prev, name: e.target.value }))}
-              required
+        currentUser?.isMasterAdmin ? (
+          <div className="card mb-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Create New Admin</h2>
+            <form onSubmit={handleCreateAdmin} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+              <input
+                className="input-field"
+                placeholder="Admin name"
+                value={adminForm.name}
+                onChange={(e) => setAdminForm((prev) => ({ ...prev, name: e.target.value }))}
+                required
             />
             <input
               type="email"
@@ -177,6 +180,17 @@ const ManageUsers = () => {
             </div>
           </form>
         </div>
+        ) : (
+          <div className="card mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-900/40">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">🔐</span>
+              <div>
+                <h3 className="font-semibold text-amber-900 dark:text-amber-300">Master Admin Only</h3>
+                <p className="text-sm text-amber-800 dark:text-amber-200">Only the main admin can create new admin accounts</p>
+              </div>
+            </div>
+          </div>
+        )
       )}
 
       <div className="relative mb-6 max-w-md">
