@@ -3,31 +3,74 @@ const User = require('../models/User');
 const { generateToken } = require('../middleware/auth');
 const { sendPasswordResetEmail } = require('../services/emailService');
 
+const sanitizeEmail = (email = '') => email.trim().toLowerCase();
+
+const formatUser = (user) => ({
+  _id: user._id,
+  name: user.name,
+  email: user.email,
+  role: user.role,
+  vehicleNumber: user.vehicleNumber,
+  phoneNumber: user.phoneNumber,
+});
+
 // @desc    Register user
 // @route   POST /api/auth/register
 exports.register = async (req, res, next) => {
   try {
     const { name, email, password, vehicleNumber, phoneNumber } = req.body;
+    const normalizedEmail = sanitizeEmail(email);
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return res.status(400).json({ success: false, message: 'Email already registered' });
     }
 
-    const user = await User.create({ name, email, password, vehicleNumber, phoneNumber });
+    const user = await User.create({
+      name,
+      email: normalizedEmail,
+      password,
+      role: 'user',
+      vehicleNumber,
+      phoneNumber,
+    });
 
     const token = generateToken(user._id);
     res.status(201).json({
       success: true,
       token,
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        vehicleNumber: user.vehicleNumber,
-        phoneNumber: user.phoneNumber,
-      },
+      user: formatUser(user),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Register admin (admin only)
+// @route   POST /api/auth/register-admin
+exports.registerAdmin = async (req, res, next) => {
+  try {
+    const { name, email, password, phoneNumber } = req.body;
+    const normalizedEmail = sanitizeEmail(email);
+
+    const existingUser = await User.findOne({ email: normalizedEmail });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: 'Email already registered' });
+    }
+
+    const adminUser = await User.create({
+      name,
+      email: normalizedEmail,
+      password,
+      role: 'admin',
+      phoneNumber,
+      vehicleNumber: '',
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Admin account created successfully',
+      user: formatUser(adminUser),
     });
   } catch (error) {
     next(error);
@@ -39,8 +82,9 @@ exports.register = async (req, res, next) => {
 exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
+    const normalizedEmail = sanitizeEmail(email);
 
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email: normalizedEmail }).select('+password');
     if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
@@ -54,14 +98,7 @@ exports.login = async (req, res, next) => {
     res.json({
       success: true,
       token,
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        vehicleNumber: user.vehicleNumber,
-        phoneNumber: user.phoneNumber,
-      },
+      user: formatUser(user),
     });
   } catch (error) {
     next(error);
@@ -100,6 +137,9 @@ exports.updateProfile = async (req, res, next) => {
 exports.getNotifications = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
     const notifications = user.notifications.sort((a, b) => b.createdAt - a.createdAt);
     res.json({ success: true, notifications });
   } catch (error) {
@@ -128,8 +168,9 @@ exports.forgotPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
     if (!email) return res.status(400).json({ success: false, message: 'Email is required' });
+    const normalizedEmail = sanitizeEmail(email);
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
       // Don't reveal whether email exists
       return res.json({ success: true, message: 'If that email exists, a reset link has been sent' });

@@ -299,7 +299,7 @@ exports.getActiveBookings = async (req, res, next) => {
     const bookings = await Booking.find({
       bookingStatus: { $in: ['confirmed', 'active'] },
     })
-      .populate('userId', 'name email phone')
+      .populate('userId', 'name email phoneNumber')
       .populate('parkingLotId', 'name city pricePerHour')
       .populate('slotId', 'slotNumber')
       .sort('endTime');

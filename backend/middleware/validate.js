@@ -16,6 +16,13 @@ const registerValidation = [
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
 ];
 
+const adminRegisterValidation = [
+  body('name').trim().notEmpty().withMessage('Name is required'),
+  body('email').isEmail().withMessage('Valid email is required'),
+  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+  body('phoneNumber').optional().trim(),
+];
+
 // Login validation
 const loginValidation = [
   body('email').isEmail().withMessage('Valid email is required'),
@@ -44,6 +51,7 @@ const parkingLotValidation = [
 module.exports = {
   validate,
   registerValidation,
+  adminRegisterValidation,
   loginValidation,
   bookingValidation,
   parkingLotValidation,
