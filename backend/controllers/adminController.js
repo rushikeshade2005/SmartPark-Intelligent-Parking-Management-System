@@ -4,6 +4,58 @@ const Payment = require('../models/Payment');
 const ParkingLot = require('../models/ParkingLot');
 const ParkingSlot = require('../models/ParkingSlot');
 
+// @desc    Get logged-in admin dashboard details
+// @route   GET /api/admin/my-dashboard
+exports.getMyDashboard = async (req, res, next) => {
+  try {
+    const admin = await User.findById(req.user._id).select('name email role phoneNumber createdAt');
+    if (!admin || admin.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Admin access required' });
+    }
+
+    const managedLots = await ParkingLot.find({ managedBy: admin._id })
+      .select('name city totalSlots availableSlots createdAt')
+      .sort('-createdAt')
+      .limit(8);
+
+    const managedLotIds = managedLots.map((lot) => lot._id);
+
+    const [totalAdmins, managedLotsCount, managedSlots, managedBookings] = await Promise.all([
+      User.countDocuments({ role: 'admin' }),
+      ParkingLot.countDocuments({ managedBy: admin._id }),
+      managedLotIds.length > 0
+        ? ParkingSlot.countDocuments({ parkingLotId: { $in: managedLotIds }, isActive: true })
+        : Promise.resolve(0),
+      managedLotIds.length > 0
+        ? Booking.countDocuments({ parkingLotId: { $in: managedLotIds } })
+        : Promise.resolve(0),
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        profile: {
+          _id: admin._id,
+          name: admin.name,
+          email: admin.email,
+          role: admin.role,
+          phoneNumber: admin.phoneNumber,
+          joinedAt: admin.createdAt,
+        },
+        myStats: {
+          totalAdmins,
+          managedLots: managedLotsCount,
+          managedSlots,
+          managedBookings,
+        },
+        managedLots,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Get all users (admin)
 // @route   GET /api/admin/users
 exports.getUsers = async (req, res, next) => {

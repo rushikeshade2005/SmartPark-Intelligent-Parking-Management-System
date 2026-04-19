@@ -96,6 +96,7 @@ exports.createParkingLot = async (req, res, next) => {
       securityAvailable, cctvAvailable, evChargingAvailable,
       ownerName, ownerPhone, ownerEmail,
       contactPhone, contactEmail, managerContact,
+      managedBy: req.user._id,
     });
 
     // Auto-create floors and slots
@@ -135,7 +136,17 @@ exports.createParkingLot = async (req, res, next) => {
 // @route   PUT /api/parking-lots/:id
 exports.updateParkingLot = async (req, res, next) => {
   try {
-    const lot = await ParkingLot.findByIdAndUpdate(req.params.id, req.body, {
+    const existingLot = await ParkingLot.findById(req.params.id);
+    if (!existingLot) {
+      return res.status(404).json({ success: false, message: 'Parking lot not found' });
+    }
+
+    const updatePayload = { ...req.body };
+    if (!existingLot.managedBy) {
+      updatePayload.managedBy = req.user._id;
+    }
+
+    const lot = await ParkingLot.findByIdAndUpdate(req.params.id, updatePayload, {
       new: true,
       runValidators: true,
     });

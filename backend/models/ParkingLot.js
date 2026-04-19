@@ -83,6 +83,13 @@ const parkingLotSchema = new mongoose.Schema(
     contactPhone: { type: String, default: '' },
     contactEmail: { type: String, default: '' },
     managerContact: { type: String, default: '' },
+
+    // Admin who created/manages this parking lot
+    managedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
   },
   { timestamps: true }
 );
