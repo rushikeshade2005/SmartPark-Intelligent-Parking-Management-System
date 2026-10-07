@@ -23,3 +23,5 @@ build/
 
 # Docker
 *.env
+# Uploaded files
+backend/uploads/
