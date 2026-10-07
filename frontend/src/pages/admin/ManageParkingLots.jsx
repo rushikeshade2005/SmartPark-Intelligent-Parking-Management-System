@@ -11,7 +11,7 @@ import {
 } from 'react-icons/hi';
 import LocationPickerMap from '../../components/map/LocationPickerMap';
 
-const BACKEND_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+const BACKEND_URL = (import.meta.env.VITE_API_URL || '/api').replace(/\/api\/?$/, '');
 
 const ManageParkingLots = () => {
   const [lots, setLots] = useState([]);

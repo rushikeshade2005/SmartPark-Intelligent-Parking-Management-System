@@ -30,8 +30,8 @@ const Contact = () => {
   }, []);
 
   const infoItems = [
-    { icon: HiOutlineLocationMarker, title: 'Address', info: contactInfo?.address || 'Smart City Tower, Sector 42, Gurgaon' },
-    { icon: HiOutlinePhone, title: 'Phone', info: contactInfo?.phone || '+91 98765 43210' },
+    { icon: HiOutlineLocationMarker, title: 'Address', info:'Om Heights, Road No 02, Benkar Wasti Dhayari' },
+    { icon: HiOutlinePhone, title: 'Phone', info:'+91 96992 05699' },
     { icon: HiOutlineMail, title: 'Email', info: contactInfo?.email || 'support@smartpark.com' },
     ...(contactInfo?.supportEmail ? [{ icon: HiOutlineGlobe, title: 'Support', info: contactInfo.supportEmail }] : []),
   ];
