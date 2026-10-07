@@ -6,10 +6,18 @@ dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI, {
+    const mongoUri = process.env.MONGODB_URI;
+    const dbName = process.env.DB_NAME || 'smartparking';
+
+    if (!mongoUri) {
+      throw new Error('MONGODB_URI is missing.');
+    }
+
+    const conn = await mongoose.connect(mongoUri, {
       family: 4, // Force IPv4
+      dbName,
     });
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
+    console.log(`MongoDB Connected: ${conn.connection.host} (db: ${conn.connection.name})`);
   } catch (error) {
     console.error(`Database connection error: ${error.message}`);
     process.exit(1);

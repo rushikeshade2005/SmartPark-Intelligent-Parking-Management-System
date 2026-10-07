@@ -7,6 +7,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const mongoose = require('mongoose');
 
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
@@ -81,7 +82,13 @@ app.use('/api/export', exportRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ success: true, message: 'SmartPark API is running', timestamp: new Date() });
+  res.json({
+    success: true,
+    message: 'SmartPark API is running',
+    timestamp: new Date(),
+    dbName: mongoose.connection?.name || process.env.DB_NAME || 'unknown',
+    nodeEnv: process.env.NODE_ENV || 'unknown',
+  });
 });
 
 // Error handler
