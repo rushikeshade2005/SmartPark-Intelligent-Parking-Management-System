@@ -6,7 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 import { HiOutlineLocationMarker, HiOutlineExternalLink, HiOutlineClock, HiOutlinePhotograph } from 'react-icons/hi';
 
-const BACKEND_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+const BACKEND_URL = (import.meta.env.VITE_API_URL || '/api').replace(/\/api\/?$/, '');
 
 const ParkingListPanel = ({ lots, selectedLot, onSelect, onViewSlots, userLocation }) => {
   const { isAuthenticated } = useAuth();

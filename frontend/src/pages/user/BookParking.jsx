@@ -14,7 +14,7 @@ import toast from 'react-hot-toast';
 import { formatCurrency, calculateDuration } from '../../utils/helpers';
 import { HiOutlineArrowLeft, HiOutlineLocationMarker, HiOutlineMap, HiOutlineViewList, HiOutlinePhotograph, HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlinePhone, HiOutlineMail } from 'react-icons/hi';
 
-const BACKEND_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+const BACKEND_URL = (import.meta.env.VITE_API_URL || '/api').replace(/\/api\/?$/, '');
 
 const BookParking = () => {
   const { lotId } = useParams();
